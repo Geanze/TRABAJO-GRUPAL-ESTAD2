@@ -1,0 +1,427 @@
+tabla de alfabetización del worldatlas 
+#Literacy2
+
+```{r}
+library(htmltab)
+literacy2=htmltab(doc="https://www.worldatlas.com/articles/the-highest-literacy-rates-in-the-world.html", which='//*[@id="artReg-table"]/table')
+```
+
+```{r}
+literacy2$Rank=NULL
+```
+
+```{r}
+names(literacy2)=c("Country", "Literacy Rate")
+```
+
+```{r}
+literacy2$Country=trimws(literacy2$Country,whitespace = "[\\h\\v]")
+```
+
+```{r}
+literacy2=literacy2[-c(196,197,198),]
+literacy2=literacy2[-c(195),]
+#Saldrá NIGER como NA asi que pulsen control+entre solo en literacy2[-c(195),]
+```
+
+```{r}
+library(stringr)
+literacy2$`Literacy Rate`=gsub('%',"",literacy2$`Literacy Rate`)
+```
+
+```{r}
+literacy2[-1]=lapply(literacy2[-1], as.numeric)
+```
+
+
+```{r}
+literacy2[!complete.cases(literacy2),]
+```
+
+```{r}
+literacy2=na.omit(literacy2)
+```
+
+```{r}
+str(literacy2)
+```
+
+La segunda variable que tiene relación con la calidad de educación es la Tasa de Escolaridad.
+#Schooling
+
+```{r}
+lkXLSX="https://github.com/Geanze/TRABAJO-GRUPAL-ESTAD2/raw/master/education-index.xlsx"
+Schooling=import(lkXLSX)
+```
+```{r}
+str(Schooling)
+```
+
+```{r}
+Schooling$`HDI Rank`=NULL
+Schooling$`1980`=NULL
+Schooling$`1985`=NULL
+Schooling$`1990`=NULL
+Schooling$`1995`=NULL
+Schooling$`2000`=NULL
+Schooling$`2005`=NULL
+Schooling$`2006`=NULL
+Schooling$`2007`=NULL
+Schooling$`2008`=NULL
+Schooling$`2009`=NULL
+Schooling$`2010`=NULL
+Schooling$`2011`=NULL
+Schooling$`2012`=NULL
+```
+
+```{r}
+names(Schooling)=c("Country", "Schooling Rate")
+```
+
+```{r}
+Schooling[c(2)]= lapply(Schooling[c(2)], as.numeric)
+```
+
+```{r}
+Schooling[complete.cases(Schooling),]
+Schooling=na.omit(Schooling)
+```
+
+Inversión en educación por país
+
+#Investment2
+```{r}
+library(rio)
+InvestEdu2=import("https://github.com/Geanze/TRABAJO-GRUPAL-ESTAD2/raw/master/InvestPBIEducation.xls")
+
+InvestEdu2$`Año de data`=NULL
+InvestEdu2$`Country Code`=NULL
+
+names(InvestEdu2)=c("Country", "Expenditure on Education(% of GDP)")
+
+complete.cases(InvestEdu2)
+```
+
+```{r}
+InvestEdu2=na.omit(InvestEdu2)
+```
+
+
+La última variable es la Tasa de Urbanización.
+#Urbanization
+
+```{r}
+lkXLS="https://github.com/Geanze/TRABAJO-GRUPAL-ESTAD2/raw/master/WUP2018-F01-Total_Urban_Rural.xls"
+urban=import(lkXLS)
+
+```
+
+```{r}
+str(urban)
+```
+
+```{r}
+urban$Urban=NULL
+urban$Rural=NULL
+urban$Total=NULL
+```
+```{r}
+names(urban)=c("Country", "Urban Rate")
+```
+
+```{r}
+urban[complete.cases(urban),]
+urban[c(1)]=lapply(urban[c(1)], trimws,whitespace = "[\\h\\v]")
+```
+#StudTeachRatio
+Porcentaje de némero de estudiantes por profesor en cada país (invertida)
+
+```{r}
+library(rio)
+
+studTeach=import("https://github.com/Geanze/TRABAJO-GRUPAL-ESTAD2/raw/master/StudTeachRatio.xls")
+```
+
+```{r}
+studTeach$`Año de data`=NULL
+studTeach$`Country Code`=NULL
+```
+
+```{r}
+names(studTeach)=c("Country", "Student-Teacher Ratio")
+```
+
+```{r}
+complete.cases(studTeach)
+```
+
+```{r}
+studTeach=na.omit(studTeach)
+```
+
+```{r}
+studTeach$`Student-Teacher Ratio`=100-studTeach$`Student-Teacher Ratio`
+```
+
+```{r}
+studTeach[2]==lapply(studTeach[2], as.numeric)
+```
+
+```{r}
+complete.cases(studTeach)
+```
+
+
+```{r}
+str(studTeach)
+```
+
+
+#Parte de Alfredo:
+
+```{r}
+linkinter="https://github.com/Alfredo-Espinoza/Estadistica-2-Parte-individual-del-trabajo-grupal/raw/master/API_IT.NET.USER.ZS_DS2_en_excel_v2_199844.xlsx"
+#Descargando en carpeta
+download.file(linkinter, "intercel.xlsx")
+```
+Unimos todas las hojas:
+#Internet
+```{r}
+library(rio)
+internet <- import_list('intercel.xlsx',rbind = TRUE)
+```
+Revisamos la base
+```{r}
+str(internet)
+```
+
+
+
+Borrando las columnas de otros años
+
+```{r}
+internet[2:50]=NULL
+```
+
+```{r}
+internet[2:12]=NULL
+```
+
+```{r}
+internet[3:13]=NULL
+```
+Eliminando los NA
+```{r}
+internet=internet[complete.cases(internet),]
+```
+Cambiando nombres de variables.
+```{r}
+names(internet)[1]="Country"
+```
+
+```{r}
+names(internet)[2]="Porcentaje de la población que usa internet (2017)"
+```
+Eliminando posibles espacios vacios
+```{r}
+internet$Country=trimws(internet$Country,whitespace = "[\\h\\v]")
+internet$`Porcentaje de la población que usa internet (2017)`=trimws(internet$`Porcentaje de la población que usa internet (2017)`,whitespace = "[\\h\\v]")
+```
+Eliminando primera fila.
+```{r}
+internet=internet[-1,]
+```
+
+Hay observaciones que corresponden a la suciedad de la data. Varias de ellas serán eliminadas una vez se realiza el merge de acuerdo a "Pais" con las variables del grupo de trabajo. El resto tendrán que ser eliminadas manualmente.
+
+Pasando la variable a numérico
+```{r}
+internet$`Porcentaje de la población que usa internet (2017)`=as.numeric(internet$`Porcentaje de la población que usa internet (2017)`)
+```
+
+Revisando
+```{r}
+str(internet)
+```
+#EsperanzadeVida
+
+```{r}
+linkvida="https://github.com/Alfredo-Espinoza/Estadistica-2-Parte-individual-del-trabajo-grupal/raw/master/API_SP.DYN.LE00.IN_DS2_en_excel_v2_199538.xlsx"
+#Descargando en carpeta
+download.file(linkvida, "vida.xlsx")
+```
+
+Unimos todas las hojas:
+```{r}
+library(rio)
+basevida <- import_list('vida.xlsx',rbind = TRUE)
+```
+
+Borrando columnas innecesarias
+```{r}
+basevida[2:50]=NULL
+```
+
+```{r}
+basevida[2:12]=NULL
+```
+
+```{r}
+basevida[3:13]=NULL
+```
+Revisamos la base de datos
+```{r}
+str(basevida)
+```
+Borramos los NAs
+```{r}
+basevida=basevida[complete.cases(basevida),]
+```
+
+Cambiando nombres de variable
+```{r}
+names(basevida)[1]="Country"
+names(basevida)[2]="Expectativa de vida en años al nacer (2017)"
+```
+Eliminamos la primera fila, porque es producto de la suciedad de losd atos.
+```{r}
+basevida=basevida[-c(1),]
+```
+Eliminando posibles espacios vacios
+```{r}
+basevida$Country=trimws(basevida$Country,whitespace = "[\\h\\v]")
+basevida$`Expectativa de vida en años al nacer (2017)`=trimws(basevida$`Expectativa de vida en años al nacer (2017)`,whitespace = "[\\h\\v]")
+```
+Revisamos la base de datos
+```{r}
+str(basevida)
+```
+
+Pasando a numérico la variable a estudiar
+```{r}
+basevida$"Expectativa de vida en años al nacer (2017)"=as.numeric(basevida$"Expectativa de vida en años al nacer (2017)")
+```
+
+```{r}
+str(basevida)
+```
+
+
+#Parte de Claudia:
+
+#BASE DE DATOS DE DESEMPLEO A NIVEL MUNDIAL 
+```{r}
+library (rio)
+Desempleo="https://github.com/claudia1006/PROYECTO/raw/master/DESEMPLEO.xlsx"
+dataexcel1d=import(Desempleo)
+```
+
+```{r}
+dim(dataexcel1d)#filas #columnas 
+```
+
+```{r}
+row.names(dataexcel1d)=dataexcel1d$Country
+```
+
+
+```{r}
+library(stringr)
+library(magrittr)
+```
+
+```{r}
+names(dataexcel1d)[1]='Country'
+```
+
+```{r}
+dataexcel1d$'2017'=as.numeric(dataexcel1d$`2017`)
+```
+
+```{r}
+str(dataexcel1d)
+```
+
+```{r}
+dataexcel1d=na.omit(dataexcel1d)
+```
+
+
+```{r}
+summary(dataexcel1d)
+```
+
+
+#BASE DE DATOS DE GDP A NIVEL MUNDIAL 
+```{r}
+GDP="https://github.com/claudia1006/PROYECTO/raw/master/GDP%20PER%20CAPITA%20CURRENT%20%24.xlsx"
+dataexcel2gdp=import(GDP)
+```
+
+```{r}
+names(dataexcel2gdp)[1]='Country'
+```
+
+```{r}
+row.names(dataexcel2gdp)=dataexcel2gdp$Country
+```
+
+```{r}
+dataexcel2gdp$'2017'=as.numeric(dataexcel2gdp$`2017`) # a numerico
+```
+
+```{r}
+str(dataexcel2gdp)
+```
+
+```{r}
+dataexcel2gdp=na.omit(dataexcel2gdp)
+```
+
+```{r}
+summary(dataexcel2gdp)
+```
+
+```{r}
+names(dataexcel1d)[2]="2017 DESEMPLEO"
+names(dataexcel2gdp)[2]="2017 GDP PER CAPITA EN $"
+```
+
+```{r}
+DesempleoyGDP=merge(dataexcel1d,dataexcel2gdp, by.x="Country", by.y="Country")
+```
+
+```{r}
+summary(DesempleoyGDP)
+```
+
+
+#Parte de Adriano
+
+```{r}
+library(rio)
+elec="https://github.com/adrianoshimante1998/Trabajo-grupal/raw/master/API_EG.ELC.ACCS.ZS_DS2_en_excel_v2_422316.xls"
+electricidad=import(elec)
+electricidad[,]=lapply(electricidad[,], trimws,whitespace = "[\\h\\v]") # no blanks
+electricidad=na.omit(electricidad)
+```
+
+```{r}
+names(electricidad)=c("Country", "Electricity 2017")
+```
+
+```{r}
+electricidad[-1]=lapply(electricidad[-1], as.numeric)
+```
+```{r}
+complete.cases(electricidad)
+```
+
+```{r}
+electricidad=na.omit(electricidad)
+```
+
+
+
+
+
