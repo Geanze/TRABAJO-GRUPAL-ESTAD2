@@ -1,0 +1,2 @@
+library(htmltab)
+literacy2=htmltab(doc="https://www.worldatlas.com/articles/the-highest-literacy-rates-in-the-world.html", which='//*[@id="artReg-table"]/table')
